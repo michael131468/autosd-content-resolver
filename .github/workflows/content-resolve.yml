@@ -6,5 +6,26 @@ jobs:
     container:
       image: fedora:37
     steps:
-      - name: my-step
-        run: echo "Hello World!"
+      - name: prepare host
+        run: dnf install -y git python3-jinja2 python3-koji python3-yaml
+      - name: checkout configs
+        uses: actions/checkout@v3
+      - name: clone content-resolver
+        uses: actions/checkout@v3
+        with:
+          repository: minimization/content-resolver
+          fetch-depth: 1
+          path: content-resolver
+      - name: run content-resolver
+        run: |
+          mkdir -p "${GITHUB_WORKSPACE}/out"
+          mkdir -p "${GITHUB_WORKSPACE}/out/history"
+          mkdir -p "${GITHUB_WORKSPACE}/dnf_cachedir"
+          ls -al "${GITHUB_WORKSPACE}"
+          cd "${GITHUB_WORKSPACE}/content-resolver"
+          ./feedback_pipeline.py --dnf-cache-dir "${GITHUB_WORKSPACE}/dnf_cachedir" ../configs "${GITHUB_WORKSPACE}/out" || true
+      - name: output artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: out
+          path: ${{ github.workspace }}/out
