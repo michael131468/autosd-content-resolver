@@ -1,0 +1,10 @@
+name: content-resolve
+on: workflow_dispatch
+jobs:
+  run-resolver:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:37
+    steps:
+      - name: my-step
+        run: echo "Hello World!"
